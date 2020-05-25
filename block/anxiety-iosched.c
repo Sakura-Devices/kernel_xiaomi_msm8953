@@ -22,7 +22,7 @@
 
 
 /* Default tunable values */
-#define	DEFAULT_MAX_WRITES_STARVED		2	/* Max times reads can starve a write */
+#define	DEFAULT_MAX_WRITES_STARVED		4	/* Max times reads can starve a write */
 #define	DEFAULT_MAX_WRITES_STARVED_SUSPENDED	0	/* Ditto but during screen-off states */
 
 struct anxiety_data {
@@ -38,7 +38,7 @@ struct anxiety_data {
 
 static void anxiety_merged_requests(struct request_queue *q, struct request *rq, struct request *next)
 {
-	rq_fifo_clear(next);
+	list_del_init(&next->queuelist);
 }
 
 static __always_inline struct request *anxiety_choose_request(struct anxiety_data *adata)
@@ -70,8 +70,8 @@ static int anxiety_dispatch(struct request_queue *q, int force)
 	if (!rq)
 		return 0;
 
-	rq_fifo_clear(rq);
-	elv_dispatch_add_tail(rq->q, rq);
+	list_del_init(&rq->queuelist);
+	elv_dispatch_sort(q, rq);
 
 	return 1;
 }
