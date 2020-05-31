@@ -98,14 +98,6 @@ static int find_deepest_state(struct cpuidle_driver *drv,
 	return ret;
 }
 
-#ifdef CONFIG_SUSPEND
-static void set_uds_callback(void *info)
-{
-	bool enable = *(bool *)info;
-
-	cpuidle_use_deepest_state(enable);
-}
-
 /* Set the current cpu to use the deepest idle state, override governors */
 void cpuidle_use_deepest_state(bool enable)
 {
@@ -116,6 +108,13 @@ void cpuidle_use_deepest_state(bool enable)
 	if (dev)
 		dev->use_deepest_state = enable;
 	preempt_enable();
+}
+
+static void set_uds_callback(void *info)
+{
+	bool enable = *(bool *)info;
+
+	cpuidle_use_deepest_state(enable);
 }
 
 /**
@@ -148,6 +147,7 @@ int cpuidle_find_deepest_state(struct cpuidle_driver *drv,
 	return find_deepest_state(drv, dev, UINT_MAX, 0, false);
 }
 
+#ifdef CONFIG_SUSPEND
 static void enter_freeze_proper(struct cpuidle_driver *drv,
 				struct cpuidle_device *dev, int index)
 {
@@ -647,26 +647,6 @@ EXPORT_SYMBOL_GPL(cpuidle_register);
 
 #ifdef CONFIG_SMP
 
-static void wake_up_idle_cpus(void *v)
-{
-	int cpu;
-	struct cpumask cpus;
-
-	preempt_disable();
-	if (v) {
-		cpumask_andnot(&cpus, v, cpu_isolated_mask);
-		cpumask_and(&cpus, &cpus, cpu_online_mask);
-	} else
-		cpumask_andnot(&cpus, cpu_online_mask, cpu_isolated_mask);
-
-	for_each_cpu(cpu, &cpus) {
-		if (cpu == smp_processor_id())
-			continue;
-		wake_up_if_idle(cpu);
-	}
-	preempt_enable();
-}
-
 static void wake_up_idle_cpus(unsigned long l, void *v)
 {
 	static unsigned long prev_latency = ULONG_MAX;
@@ -687,26 +667,6 @@ static void wake_up_idle_cpus(unsigned long l, void *v)
 	prev_latency = l;
 
 	
-}
-
-static void wake_up_idle_cpus(unsigned long l, void *v)
-{
-        static unsigned long prev_latency = ULONG_MAX;
-        struct cpumask cpus;
-        int cpu;
-
-        if (l < prev_latency) {
-                cpumask_andnot(&cpus, cpu_online_mask, cpu_isolated_mask);
-                preempt_disable();
-                for_each_cpu(cpu, &cpus) {
-                        if (cpu == smp_processor_id())
-                                continue;
-                        wake_up_if_idle(cpu);
-                }
-                preempt_enable();
-        }
-
-        prev_latency = l;
 }
 
 /*

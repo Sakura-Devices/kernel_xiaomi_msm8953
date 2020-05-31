@@ -899,7 +899,8 @@ int adreno_ringbuffer_submitcmd(struct adreno_device *adreno_dev,
 	unsigned int dwords = 0;
 	struct adreno_submit_time local;
 	bool set_ib1list_marker = false;
-
+	struct adreno_firmware *fw = ADRENO_FW(adreno_dev, ADRENO_FW_SQE);
+	
 	memset(&local, 0x0, sizeof(local));
 
 	context = drawobj->context;
