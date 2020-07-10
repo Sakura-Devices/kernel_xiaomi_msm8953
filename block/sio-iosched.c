@@ -24,11 +24,11 @@
 enum { ASYNC, SYNC };
 
 /* Tunables */
-static const int sync_read_expire  = HZ / 2;	/* max time before a sync read is submitted. */
-static const int sync_write_expire = 2 * HZ;	/* max time before a sync write is submitted. */
+static const int sync_read_expire   = 500;	/* max time before a sync read is submitted. */
+static const int sync_write_expire  = 2000;	/* max time before a sync write is submitted. */
 
-static const int async_read_expire  =  4 * HZ;	/* ditto for async, these limits are SOFT! */
-static const int async_write_expire = 16 * HZ;	/* ditto for async, these limits are SOFT! */
+static const int async_read_expire  = 4000;	/* ditto for async, these limits are SOFT! */
+static const int async_write_expire = 16000;	/* ditto for async, these limits are SOFT! */
 
 static const int writes_starved = 2;		/* max times reads can starve a write */
 static const int fifo_batch     = 8;		/* # of sequential requests treated as one
@@ -272,10 +272,10 @@ static int sio_init_queue(struct request_queue *q, struct elevator_type *e)
 
 	/* Initialize data */
 	sd->batched = 0;
-	sd->fifo_expire[SYNC][READ] = sync_read_expire;
-	sd->fifo_expire[SYNC][WRITE] = sync_write_expire;
-	sd->fifo_expire[ASYNC][READ] = async_read_expire;
-	sd->fifo_expire[ASYNC][WRITE] = async_write_expire;
+	sd->fifo_expire[SYNC][READ] = msecs_to_jiffies(sync_read_expire);
+	sd->fifo_expire[SYNC][WRITE] = msecs_to_jiffies(sync_write_expire);
+	sd->fifo_expire[ASYNC][READ] = msecs_to_jiffies(async_read_expire);
+	sd->fifo_expire[ASYNC][WRITE] = msecs_to_jiffies(async_write_expire);
 	sd->fifo_batch = fifo_batch;
 
 	return 0;

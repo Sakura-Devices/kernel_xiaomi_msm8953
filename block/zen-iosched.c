@@ -16,8 +16,8 @@
 
 enum zen_data_dir { ASYNC, SYNC };
 
-static const int sync_expire  = HZ / 2;    /* max time before a sync is submitted. */
-static const int async_expire = 5 * HZ;    /* ditto for async, these limits are SOFT! */
+static const int sync_expire  = 500;    /* max time before a sync is submitted. */
+static const int async_expire = 5000;    /* ditto for async, these limits are SOFT! */
 static const int fifo_batch = 16;
 
 struct zen_data {
@@ -174,8 +174,8 @@ static int zen_init_queue(struct request_queue *q, struct elevator_type *e)
 
 	INIT_LIST_HEAD(&zdata->fifo_list[SYNC]);
 	INIT_LIST_HEAD(&zdata->fifo_list[ASYNC]);
-	zdata->fifo_expire[SYNC] = sync_expire;
-	zdata->fifo_expire[ASYNC] = async_expire;
+	zdata->fifo_expire[SYNC] = msecs_to_jiffies(sync_expire);
+	zdata->fifo_expire[ASYNC] = msecs_to_jiffies(async_expire);
 	zdata->fifo_batch = fifo_batch;
 
 	spin_lock_irq(q->queue_lock);
