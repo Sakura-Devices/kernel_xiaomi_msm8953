@@ -37,7 +37,7 @@ static const int fifo_batch     = 8;		/* # of sequential requests treated as one
 /* Elevator data */
 struct sio_data {
 	/* Request queues */
-	struct list_head fifo_list[2][2];
+	struct list_head fifo_list[2][2] ____cacheline_aligned_in_smp;
 
 	/* Attributes */
 	unsigned int batched;

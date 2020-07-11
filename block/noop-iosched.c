@@ -9,7 +9,7 @@
 #include <linux/init.h>
 
 struct noop_data {
-	struct list_head queue;
+	struct list_head queue ____cacheline_aligned_in_smp;
 };
 
 static void noop_merged_requests(struct request_queue *q, struct request *rq,

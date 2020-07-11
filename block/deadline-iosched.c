@@ -32,7 +32,7 @@ struct deadline_data {
 	 * requests (deadline_rq s) are present on both sort_list and fifo_list
 	 */
 	struct rb_root sort_list[2];	
-	struct list_head fifo_list[2];
+	struct list_head fifo_list[2] ____cacheline_aligned_in_smp;
 
 	/*
 	 * next in sort order. read, write or both are NULL

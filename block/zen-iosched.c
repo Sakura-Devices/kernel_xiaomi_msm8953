@@ -23,7 +23,7 @@ static const int fifo_batch = 16;
 struct zen_data {
 	/* Runtime Data */
 	/* Requests are only present on fifo_list */
-	struct list_head fifo_list[2];
+	struct list_head fifo_list[2] ____cacheline_aligned_in_smp;
 
 	unsigned int batching;		/* number of sequential requests made */
 
